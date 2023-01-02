@@ -11,11 +11,11 @@ Route::prefix('admin')
      * Routes Detail Plan
      */
     Route::delete('plans/{url}/details/{idDetail}', [DetailPlanController::class, 'destroy'])->name('plans.details.destroy');
+    Route::get('plans/{url}/details/create', [DetailPlanController::class, 'create'])->name('plans.details.create');
     Route::get('plans/{url}/details/{idDetail}', [DetailPlanController::class, 'show'])->name('plans.details.show');
     Route::put('plans/{url}/details/{idDetail}', [DetailPlanController::class, 'update'])->name('plans.details.update');
     Route::get('plans/{url}/details/{idDetail}/edit', [DetailPlanController::class, 'edit'])->name('plans.details.edit');
     Route::post('plans/{url}/details', [DetailPlanController::class, 'store'])->name('plans.details.store');
-    Route::get('plans/{url}/details/create', [DetailPlanController::class, 'create'])->name('plans.details.create');
     Route::get('plans/{url}/details', [DetailPlanController::class, 'index'])->name('plans.details.index');
 
     /**
@@ -33,7 +33,7 @@ Route::prefix('admin')
     /**
      *  Home Dashboard
     */
-    Route::get('/', [Admin\Plancontroller::class, 'index'])->name('admin.index');
+    Route::get('/', [Plancontroller::class, 'index'])->name('admin.index');
 });
 
 Route::get('/', function ()
