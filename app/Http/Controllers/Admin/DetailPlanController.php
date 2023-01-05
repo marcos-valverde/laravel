@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\StoreUpdateDetailPlan;
 use App\Http\Controllers\Controller;
 use App\Models\DetailPlan;
-use App\Models\Plan;
+use App\Models\Plan;    
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreUpdateDetailPlan; 
 
 class DetailPlanController extends Controller
 {
-    protected $detailPlan, $plan;
+    protected $repository, $plan;
 
     public function __construct(DetailPlan $detailPlan, Plan $plan)
     {
-        $this->detailPlan = $detailPlan;
+        $this->repository = $detailPlan;
         $this->plan = $plan;
+
+        $this->middleware(['can:plans']);
     }
 
     public function index($urlPlan)
@@ -25,11 +27,12 @@ class DetailPlanController extends Controller
             return redirect()->back();
         }
 
+        // $details = $plan->details()->get();
         $details = $plan->details()->paginate();
 
         return view('admin.pages.plans.details.index', [
+            'plan' => $plan,
             'details' => $details,
-            'plan' => $plan
         ]);
     }
 
@@ -39,9 +42,8 @@ class DetailPlanController extends Controller
         {
             return redirect()->back();
         }
-
-        return view('admin.pages.plans.details.create', [
-            'plan' => $plan
+        return  view('admin.pages.plans.details.create', [
+                'plan' => $plan,
         ]);
     }
 
@@ -52,36 +54,30 @@ class DetailPlanController extends Controller
             return redirect()->back();
         }
 
-        // $data = $request->all();
-        // $data['plan_id'] = $plan->id;
-        // $this->detailPlan->create($data);
-
         $plan->details()->create($request->all());
 
-        return redirect()->route('plans.details.index', $plan->url);
+        return redirect()->route('details.plan.index', $plan->url);
     }
 
     public function edit($urlPlan, $idDetail)
     {
         $plan = $this->plan->where('url', $urlPlan)->first();
-        $detail = $plan->details()->find($idDetail);
-
+        $detail = $this->repository->find($idDetail);
         if(!$plan || !$detail)
         {
             return redirect()->back();
         }
 
-        return view('admin.pages.plans.details.edit', [
-            'detail' => $detail,
-            'plan' => $plan
+        return  view('admin.pages.plans.details.edit', [
+                'plan' => $plan,
+                'detail' => $detail
         ]);
     }
 
     public function update(StoreUpdateDetailPlan $request, $urlPlan, $idDetail)
     {
         $plan = $this->plan->where('url', $urlPlan)->first();
-        $detail = $plan->details()->find($idDetail);
-
+        $detail = $this->repository->find($idDetail);
         if(!$plan || !$detail)
         {
             return redirect()->back();
@@ -89,30 +85,28 @@ class DetailPlanController extends Controller
 
         $detail->update($request->all());
 
-        return redirect()->route('plans.details.index', $plan->url);
+        return redirect()->route('details.plan.index', $plan->url);
     }
 
     public function show($urlPlan, $idDetail)
     {
         $plan = $this->plan->where('url', $urlPlan)->first();
-        $detail = $plan->details()->find($idDetail);
-
+        $detail = $this->repository->find($idDetail);
         if(!$plan || !$detail)
         {
             return redirect()->back();
         }
 
-        return view('admin.pages.plans.details.show', [
-            'detail' => $detail,
-            'plan' => $plan
+        return  view('admin.pages.plans.details.show', [
+                'plan' => $plan,
+                'detail' => $detail
         ]);
     }
 
     public function destroy($urlPlan, $idDetail)
     {
         $plan = $this->plan->where('url', $urlPlan)->first();
-        $detail = $plan->details()->find($idDetail);
-
+        $detail = $this->repository->find($idDetail);
         if(!$plan || !$detail)
         {
             return redirect()->back();
@@ -121,7 +115,7 @@ class DetailPlanController extends Controller
         $detail->delete();
 
         return redirect()
-                ->route('plans.details.index', $plan->url)
-                ->with('message', 'Registro deletado com sucesso!');
+                    ->route('details.plan.index', $plan->url)
+                    ->with('message', 'Registro excluído com sucesso');
     }
 }
